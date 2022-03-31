@@ -51,7 +51,7 @@ int main(int argc, char** argv)
 
     if (!glfwInit()) { return -1; }
 
-    window = glfwCreateWindow(width, height, "Math3D", NULL, NULL);
+    window = glfwCreateWindow(width, height, "Graph3D", NULL, NULL);
     if (!window) { glfwTerminate(); return -1; }
 
     glfwMakeContextCurrent(window);
