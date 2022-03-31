@@ -8,6 +8,8 @@
 #include <math.h>
 #include <string.h>
 
+int width = 1280, height = 720;
+
 const char vertex_shader[] = "#version 330 core\nlayout (location = 0) in vec3 position;layout (location = 1) in vec3 rgb;uniform mat4 transform;uniform mat4 projection;uniform mat4 view;out vec3 RGB;void main(){gl_Position = projection * view * transform * vec4(position.xzy, 1.0f);RGB = rgb;}";
 const char fragment_shader[] = "#version 330 core\nout vec4 color;in vec3 RGB;void main(){color = vec4(RGB.xyz, 1.0f);}";
 
@@ -42,10 +44,10 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 
 void hsv_to_rgb(float h, float s, float v, float* r, float* g, float* b);
 
+void window_size_callback(GLFWwindow* window, int width, int height);
+
 int main(int argc, char** argv)
 {
-    const int width = 640, height = 480;
-
     lastX = width / 2;
     lastY = height/ 2;
 
@@ -100,8 +102,12 @@ int main(int argc, char** argv)
 
     float lastFrame = 0.0f;
 
+    char lock_Cursor = 1;
+    float lastCursor_change = 0;
+
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
     glfwSetCursorPosCallback(window, mouse_callback); 
+    glfwSetWindowSizeCallback(window, window_size_callback);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -128,8 +134,28 @@ int main(int argc, char** argv)
         glfwPollEvents();
 
         float now = glfwGetTime();
+        if(glfwGetKey(window, GLFW_KEY_LEFT_ALT))
+        {
+            float dc = now - lastCursor_change;
+            if(lock_Cursor && dc > 0.5)
+            {
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                glfwSetCursorPosCallback(window, NULL); 
+                lastCursor_change = now;
+                lock_Cursor = 0;
+            }
+            else if (dc > 0.5)
+            {
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                glfwSetCursorPosCallback(window, mouse_callback);
+                lastCursor_change = now;
+                lock_Cursor = 1;
+            }
+        }
         walk(window, cameraPos, cameraFrnt, cameraUp, now - lastFrame);
         lastFrame = now;
+
+
     }
 
     free(polygons);
@@ -360,4 +386,11 @@ void hsv_to_rgb(float h, float s, float v, float* r, float* g, float* b)
 			*b = q;
 			break;
 	}
+}
+
+void window_size_callback(GLFWwindow* window, int x, int y)
+{
+    width = x;
+    height = y;
+    glViewport(0, 0, width, height);
 }
