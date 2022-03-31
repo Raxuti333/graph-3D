@@ -32,6 +32,8 @@ float Wingle(float x, float y);
 
 float Tube(float x, float y);
 
+float Riple(float x, float y);
+
 Vertex* genVertex(float (*f)(float,float), const float Δx, const float Δy, size_t* size, const float x_min, const float x_max, const float y_min, const float y_max);
 
 unsigned int genVBO(Vertex* polygons, size_t size);
@@ -70,6 +72,7 @@ int main(int argc, char** argv)
         if(!strcmp("Wigle", argv[1])) { polygons = genVertex(Wingle, 0.01f, 0.01f, &bytes, obj_space_x_min, obj_space_x_max, obj_space_y_min, obj_space_y_max); }
         else if(!strcmp("Paraboloid", argv[1])) { polygons = genVertex(Paraboloid, 0.05f, 0.05f, &bytes, obj_space_x_min, obj_space_x_max, obj_space_y_min, obj_space_y_max); }
         else if(!strcmp("Tube", argv[1])) { polygons = genVertex(Tube, 0.05f, 0.05f, &bytes, obj_space_x_min, obj_space_x_max, obj_space_y_min, obj_space_y_max); }
+        else if(!strcmp("Riple", argv[1])) { polygons = genVertex(Riple, 0.01f, 0.01f, &bytes, obj_space_x_min, obj_space_x_max, obj_space_y_min, obj_space_y_max); }
         else { polygons = genVertex(Wingle, 0.1f, 0.1f, &bytes, obj_space_x_min, obj_space_x_max, obj_space_y_min, obj_space_y_max); }
     }
     else { polygons = genVertex(Wingle, 0.1f, 0.1f, &bytes, obj_space_x_min, obj_space_x_max, obj_space_y_min, obj_space_y_max); }
@@ -179,6 +182,8 @@ float Tube(float x, float y)
     return -(5.0f/(x*x+y*y));
 }
 
+float Riple(float x, float y) { return sinf(5*(x*x+y*y))/10; }
+
 Vertex* genVertex(float (*f)(float,float), const float Δx, const float Δy, size_t* size, const float x_min, const float x_max, const float y_min, const float y_max)
 {
     srand(0x123);
@@ -194,7 +199,7 @@ Vertex* genVertex(float (*f)(float,float), const float Δx, const float Δy, siz
         for(float x = x_min; x < (x_max - Δx); x += Δx)
         {
             float r, g, b;
-            hsv_to_rgb(177.f + 100.f * (f(x+Δx,y+Δy)-f(x, y))/fabsf(Δx+Δy), 0.8f, 0.8f, &r, &g, &b);
+            hsv_to_rgb(177.f + 100.f * ((f(x+Δx,y+Δy)-f(x, y))/fabsf(Δx+Δy)), 0.8f, 0.8f, &r, &g, &b);
 
             polygons[vertex] = (Vertex){x, y, f(x, y), r, g, b};
             polygons[vertex + 1] = (Vertex){x + Δx, y, f(x + Δx, y), r, g, b};
