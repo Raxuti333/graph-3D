@@ -40,6 +40,8 @@ void walk(GLFWwindow* window, float* cameraPos, float* cameraFront, float* camer
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 
+void hsv_to_rgb(float h, float s, float v, float* r, float* g, float* b);
+
 int main(int argc, char** argv)
 {
     const int width = 640, height = 480;
@@ -63,7 +65,7 @@ int main(int argc, char** argv)
 
     if(argc == 2)
     {
-        if(!strcmp("Wigle", argv[1])) { polygons = genVertex(Wingle, 0.1f, 0.1f, &bytes, obj_space_x_min, obj_space_x_max, obj_space_y_min, obj_space_y_max); }
+        if(!strcmp("Wigle", argv[1])) { polygons = genVertex(Wingle, 0.01f, 0.01f, &bytes, obj_space_x_min, obj_space_x_max, obj_space_y_min, obj_space_y_max); }
         else if(!strcmp("Paraboloid", argv[1])) { polygons = genVertex(Paraboloid, 0.1f, 0.1f, &bytes, obj_space_x_min, obj_space_x_max, obj_space_y_min, obj_space_y_max); }
         else if(!strcmp("Tube", argv[1])) { polygons = genVertex(Tube, 0.1f, 0.1f, &bytes, obj_space_x_min, obj_space_x_max, obj_space_y_min, obj_space_y_max); }
         else { polygons = genVertex(Wingle, 0.1f, 0.1f, &bytes, obj_space_x_min, obj_space_x_max, obj_space_y_min, obj_space_y_max); }
@@ -165,9 +167,9 @@ Vertex* genVertex(float (*f)(float,float), const float Δx, const float Δy, siz
     {
         for(float x = x_min; x < (x_max - Δx); x += Δx)
         {
-            float r = (rand() % 255) / 256.0f;
-            float g = (rand() % 255) / 256.0f;
-            float b = (rand() % 255) / 256.0f;
+            float r, g, b;
+            hsv_to_rgb(177.f + 100.f * (f(x+Δx,y+Δy)-f(x, y))/fabsf(Δx+Δy), 0.8f, 0.8f, &r, &g, &b);
+
             polygons[vertex] = (Vertex){x, y, f(x, y), r, g, b};
             polygons[vertex + 1] = (Vertex){x + Δx, y, f(x + Δx, y), r, g, b};
             polygons[vertex + 2] = (Vertex){x, y + Δy, f(x, y + Δy), r, g, b};
@@ -294,4 +296,68 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     direction[2] = sinf(glm_rad(yaw)) * cosf(glm_rad(pitch));
     glm_vec3_normalize_to(direction, cameraFrnt);
 
-}  
+}
+
+void hsv_to_rgb(float h, float s, float v, float* r, float* g, float* b)
+{
+    if(s == 0.0f)
+    {
+        *r = v;
+        *g = v;
+        *b = v;
+
+        return;
+    }
+
+    int i;
+	float f, p, q, t;
+
+    if(h == 360) { h = 0; }
+    else { h = h / 60; }
+
+    i = (int)trunc(h);
+	f = h - i;
+
+	p = v * (1.0 - s);
+	q = v * (1.0 - (s * f));
+	t = v * (1.0 - (s * (1.0 - f)));
+
+    switch (i)
+	{
+		case 0:
+			*r = v;
+			*g = t;
+			*b = p;
+			break;
+
+		case 1:
+			*r = q;
+			*g = v;
+			*b = p;
+			break;
+
+		case 2:
+			*r = p;
+			*g = v;
+			*b = t;
+			break;
+
+		case 3:
+			*r = p;
+			*g = q;
+			*b = v;
+			break;
+
+		case 4:
+			*r = t;
+			*g = p;
+			*b = v;
+			break;
+
+		default:
+			*r = v;
+			*g = p;
+			*b = q;
+			break;
+	}
+}
