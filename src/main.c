@@ -28,7 +28,7 @@ float Paraboloid(float x, float y);
 
 float Wingle(float x, float y);
 
-float Sphere(float x, float y);
+float Tube(float x, float y);
 
 Vertex* genVertex(float (*f)(float,float), const float Δx, const float Δy, size_t* size, const float x_min, const float x_max, const float y_min, const float y_max);
 
@@ -59,7 +59,16 @@ int main(int argc, char** argv)
     if(glewInit() != GLEW_OK) { return -1; }
 
     size_t bytes;
-    Vertex* polygons = genVertex(Wingle, 0.5f, 0.5f, &bytes, obj_space_x_min, obj_space_x_max, obj_space_y_min, obj_space_y_max);
+    Vertex* polygons;
+
+    if(argc == 2)
+    {
+        if(!strcmp("Wigle", argv[1])) { polygons = genVertex(Wingle, 0.1f, 0.1f, &bytes, obj_space_x_min, obj_space_x_max, obj_space_y_min, obj_space_y_max); }
+        else if(!strcmp("Wigle", argv[1])) { polygons = genVertex(Paraboloid, 0.1f, 0.1f, &bytes, obj_space_x_min, obj_space_x_max, obj_space_y_min, obj_space_y_max); }
+        else if(!strcmp("Tube", argv[1])) { polygons = genVertex(Tube, 0.1f, 0.1f, &bytes, obj_space_x_min, obj_space_x_max, obj_space_y_min, obj_space_y_max); }
+        else { polygons = genVertex(Wingle, 0.1f, 0.1f, &bytes, obj_space_x_min, obj_space_x_max, obj_space_y_min, obj_space_y_max); }
+    }
+    else { polygons = genVertex(Wingle, 0.1f, 0.1f, &bytes, obj_space_x_min, obj_space_x_max, obj_space_y_min, obj_space_y_max); }
 
     unsigned int VBO = genVBO(polygons, bytes);
 
@@ -132,14 +141,14 @@ float Paraboloid(float x, float y) { return x*x + y*y - 1.0f; }
 
 float Wingle(float x, float y) { return sinf(x) + sinf(y) - 1.0f; }
 
-float Sphere(float x, float y) 
+float Tube(float x, float y)
 {
-    if(x <= 1.0f && x >= -1.0f && y <= 1.0f && y >= -1.0f )
+    if(x == 0 || y == 0)
     {
-        return sqrtf(1.0f - x*x - y*y);
+        return -1000.f;
     }
 
-    return 0.0f;
+    return -(5.0f/(x*x+y*y));
 }
 
 Vertex* genVertex(float (*f)(float,float), const float Δx, const float Δy, size_t* size, const float x_min, const float x_max, const float y_min, const float y_max)
