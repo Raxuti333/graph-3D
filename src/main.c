@@ -66,8 +66,8 @@ int main(int argc, char** argv)
     if(argc == 2)
     {
         if(!strcmp("Wigle", argv[1])) { polygons = genVertex(Wingle, 0.01f, 0.01f, &bytes, obj_space_x_min, obj_space_x_max, obj_space_y_min, obj_space_y_max); }
-        else if(!strcmp("Paraboloid", argv[1])) { polygons = genVertex(Paraboloid, 0.1f, 0.1f, &bytes, obj_space_x_min, obj_space_x_max, obj_space_y_min, obj_space_y_max); }
-        else if(!strcmp("Tube", argv[1])) { polygons = genVertex(Tube, 0.1f, 0.1f, &bytes, obj_space_x_min, obj_space_x_max, obj_space_y_min, obj_space_y_max); }
+        else if(!strcmp("Paraboloid", argv[1])) { polygons = genVertex(Paraboloid, 0.05f, 0.05f, &bytes, obj_space_x_min, obj_space_x_max, obj_space_y_min, obj_space_y_max); }
+        else if(!strcmp("Tube", argv[1])) { polygons = genVertex(Tube, 0.05f, 0.05f, &bytes, obj_space_x_min, obj_space_x_max, obj_space_y_min, obj_space_y_max); }
         else { polygons = genVertex(Wingle, 0.1f, 0.1f, &bytes, obj_space_x_min, obj_space_x_max, obj_space_y_min, obj_space_y_max); }
     }
     else { polygons = genVertex(Wingle, 0.1f, 0.1f, &bytes, obj_space_x_min, obj_space_x_max, obj_space_y_min, obj_space_y_max); }
