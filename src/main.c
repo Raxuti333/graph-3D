@@ -11,7 +11,12 @@
 const char vertex_shader[] = "#version 330 core\nlayout (location = 0) in vec3 position;layout (location = 1) in vec3 rgb;uniform mat4 transform;uniform mat4 projection;uniform mat4 view;out vec3 RGB;void main(){gl_Position = projection * view * transform * vec4(position.xzy, 1.0f);RGB = rgb;}";
 const char fragment_shader[] = "#version 330 core\nout vec4 color;in vec3 RGB;void main(){color = vec4(RGB.xyz, 1.0f);}";
 
-float lastX = 0.0f, lastY = 0.0f;
+const float obj_space_x_min = -10.0f, obj_space_x_max = 10.0f;
+const float obj_space_y_min = -10.0f, obj_space_y_max = 10.0f;
+
+const float moveSpeed = 3.0f;
+
+float lastX, lastY;
 
 vec3 cameraFrnt = {0.0f, 0.0f, -1.0f};
 float yaw = M_PI / 2.0f;
@@ -25,7 +30,7 @@ float Wingle(float x, float y);
 
 float Sphere(float x, float y);
 
-Vertex* genVertex(float (*f)(float,float), float Δx, float Δy, size_t* size);
+Vertex* genVertex(float (*f)(float,float), const float Δx, const float Δy, size_t* size, const float x_min, const float x_max, const float y_min, const float y_max);
 
 unsigned int genVBO(Vertex* polygons, size_t size);
 
@@ -54,7 +59,7 @@ int main(int argc, char** argv)
     if(glewInit() != GLEW_OK) { return -1; }
 
     size_t bytes;
-    Vertex* polygons = genVertex(Paraboloid, 0.1f, 0.1f, &bytes);
+    Vertex* polygons = genVertex(Wingle, 0.5f, 0.5f, &bytes, obj_space_x_min, obj_space_x_max, obj_space_y_min, obj_space_y_max);
 
     unsigned int VBO = genVBO(polygons, bytes);
 
@@ -129,18 +134,17 @@ float Wingle(float x, float y) { return sinf(x) + sinf(y) - 1.0f; }
 
 float Sphere(float x, float y) 
 {
-    if(x < 1.0f && x > -1.0f && y < 1.0f && y > -1.0f )
+    if(x <= 1.0f && x >= -1.0f && y <= 1.0f && y >= -1.0f )
     {
         return sqrtf(1.0f - x*x - y*y);
     }
+
     return 0.0f;
 }
 
-Vertex* genVertex(float (*f)(float,float), const float Δx, const float Δy, size_t* size)
+Vertex* genVertex(float (*f)(float,float), const float Δx, const float Δy, size_t* size, const float x_min, const float x_max, const float y_min, const float y_max)
 {
     srand(0x123);
-    const float x_min = -5.0f, x_max = 5.0f; 
-    const float y_min = -5.0f, y_max = 5.0f;
 
     *size = (size_t)ceilf(fabsf(x_max - x_min) / Δx) * (size_t)ceilf(fabsf(y_max - y_min) / Δy) * 6UL * sizeof(Vertex);
 
@@ -223,7 +227,7 @@ unsigned int genShader(const char* vs, const char* fs)
 void walk(GLFWwindow* window, float* cameraPos, float* cameraFront, float* cameraUp, float Δt)
 {
 
-    float walkspeed = 0.5f * Δt;
+    float walkspeed = moveSpeed * Δt;
 
     if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT)) { walkspeed *= 2.0f; }
 
